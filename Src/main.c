@@ -83,23 +83,65 @@ void DelayNonsens(uint32_t *DelayCounter, uint32_t const * TaretCount);
 /* USER CODE BEGIN 0 */
 void Led_GreenBlink(void *pvParameters)
 {
-	const TickType_t xDelay = 250/portTICK_PERIOD_MS);
+	const TickType_t xDelay = 250/portTICK_PERIOD_MS;
 	uint32_t GreenDelay = 0;
 	const uint32_t TargetCount = 200000;
 
 	for(;;){
 		//LED_Green_On();
-
-
+		LED_Green_On();
+		DelayNonsens(&GreenDelay, &TargetCount);
+		vTaskDelay(xDelay);
 		//LED_Green_Off();
+		LED_Green_Off();
+		DelayNonsens(&GreenDelay, &TargetCount);
+		vTaskDelay(xDelay);
 	}
 
 }
-void Led_RedBlink(void *pvParameters);
-void Led_BlueBlink(void *pvParameters);
+void Led_RedBlink(void *pvParameters)
+{
+	const TickType_t xDelay = 250/portTICK_PERIOD_MS;
+	uint32_t RedDelay = 0;
+	const uint32_t TargetCount = 200000;
+
+	for(;;){
+		LED_Red_On();
+		DelayNonsens(&RedDelay, &TargetCount);
+		vTaskDelay(xDelay);
+		LED_Red_Off();
+		DelayNonsens(&RedDelay, &TargetCount);
+		vTaskDelay(xDelay);
+	}
+
+}
+
+void Led_BlueBlink(void *pvParameters)
+{
+	const TickType_t xDelay = 250/portTICK_PERIOD_MS;
+	uint32_t BlueDelay = 0;
+	const uint32_t TargetCount = 200000;
+
+	for(;;){
+		//LED_Green_On();
+		LED_Blue_On();
+		DelayNonsens(&BlueDelay, &TargetCount);
+		vTaskDelay(xDelay);
+		//LED_Green_Off();
+		LED_Blue_Off();
+		DelayNonsens(&BlueDelay, &TargetCount);
+		vTaskDelay(xDelay);
+	}
+
+}
+
 
 void DelayNonsens(uint32_t *DelayCounter, uint32_t const * TaretCount){
+	while(*DelayCounter <= *TaretCount){
+		*DelayCounter = *DelayCounter + 1;
+	}
 
+	*DelayCounter = 0;
 }
 /* USER CODE END 0 */
 
