@@ -52,7 +52,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -81,35 +81,48 @@ void DelayNonsens(uint32_t *DelayCounter, uint32_t const * TaretCount);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+SemaphoreHandle_t LEDMutex;
+
 void Led_GreenBlink(void *pvParameters) {
 	const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
 	uint32_t GreenDelay = 0;
 	const uint32_t TargetCount = 200000;
 
 	for (;;) {
-		//LED_Green_On();
-		LED_Green_On();
-		DelayNonsens(&GreenDelay, &TargetCount);
-		vTaskDelay(xDelay);
-		//LED_Green_Off();
-		LED_Green_Off();
-		DelayNonsens(&GreenDelay, &TargetCount);
-		vTaskDelay(xDelay);
-	}
+		for (int var = 0; var < 10; var++) {
+			vTaskDelay(xDelay);
+		}
 
+		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+			LED_Green_On();
+			DelayNonsens(&GreenDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			LED_Green_Off();
+			DelayNonsens(&GreenDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			xSemaphoreGive(LEDMutex);
+		}
+	}
 }
+
 void Led_RedBlink(void *pvParameters) {
 	const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
 	uint32_t RedDelay = 0;
 	const uint32_t TargetCount = 200000;
 
 	for (;;) {
-		LED_Red_On();
-		DelayNonsens(&RedDelay, &TargetCount);
-		vTaskDelay(xDelay);
-		LED_Red_Off();
-		DelayNonsens(&RedDelay, &TargetCount);
-		vTaskDelay(xDelay);
+		for (int var = 0; var < 10; var++) {
+			vTaskDelay(xDelay);
+		}
+		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+			LED_Red_On();
+			DelayNonsens(&RedDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			LED_Red_Off();
+			DelayNonsens(&RedDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			xSemaphoreGive(LEDMutex);
+		}
 	}
 }
 
@@ -119,14 +132,18 @@ void Led_BlueBlink(void *pvParameters) {
 	const uint32_t TargetCount = 200000;
 
 	for (;;) {
-		//LED_Green_On();
-		LED_Blue_On();
-		DelayNonsens(&BlueDelay, &TargetCount);
-		vTaskDelay(xDelay);
-		//LED_Green_Off();
-		LED_Blue_Off();
-		DelayNonsens(&BlueDelay, &TargetCount);
-		vTaskDelay(xDelay);
+		for (int var = 0; var < 10; var++) {
+			vTaskDelay(xDelay);
+		}
+		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+			LED_Blue_On();
+			DelayNonsens(&BlueDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			LED_Blue_Off();
+			DelayNonsens(&BlueDelay, &TargetCount);
+			vTaskDelay(xDelay);
+			xSemaphoreGive(LEDMutex);
+		}
 	}
 
 }
@@ -167,12 +184,19 @@ int main(void) {
 
 	/* USER CODE BEGIN 2 */
 	xTaskCreate(Led_GreenBlink, (const char* const ) "led green",
-			configMINIMAL_STACK_SIZE, 0, 3, 0);
+	configMINIMAL_STACK_SIZE, 0, 3, 0);
 	xTaskCreate(Led_RedBlink, (const char* const ) "led red",
-			configMINIMAL_STACK_SIZE, 0, 2, 0);
+	configMINIMAL_STACK_SIZE, 0, 2, 0);
 	xTaskCreate(Led_BlueBlink, (const char* const ) "led blue",
-			configMINIMAL_STACK_SIZE, 0, 1, 0);
+	configMINIMAL_STACK_SIZE, 0, 1, 0);
 
+	LEDMutex = xSemaphoreCreateMutex();
+
+	if(LEDMutex == NULL){
+
+	}else{
+
+	}
 	/* USER CODE END 2 */
 
 	/* Call init function for freertos objects (in freertos.c) */
@@ -189,7 +213,6 @@ int main(void) {
 //#ifdef PEX_RTOS_START
 //	PEX_RTOS_START();
 //#endif
-
 	while (1) {
 		/* USER CODE END WHILE */
 
@@ -256,22 +279,28 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 void LED_Green_On(void) {
-	HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, 1);
+	LED_Red_Off();
+	LED_Blue_Off();
+	HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_RESET);
 }
 void LED_Green_Off(void) {
-	HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, 0);
+	HAL_GPIO_WritePin(LED_Green_GPIO_Port, LED_Green_Pin, GPIO_PIN_SET);
 }
 void LED_Red_On(void) {
-	HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, 1);
+	LED_Green_Off();
+	LED_Blue_Off();
+	HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_RESET);
 }
 void LED_Red_Off(void) {
-	HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, 0);
+	HAL_GPIO_WritePin(LED_Red_GPIO_Port, LED_Red_Pin, GPIO_PIN_SET);
 }
 void LED_Blue_On(void) {
-	HAL_GPIO_WritePin(LED_Blue_GPIO_Port, LED_Blue_Pin, 1);
+	LED_Green_Off();
+	LED_Red_Off();
+	HAL_GPIO_WritePin(LED_Blue_GPIO_Port, LED_Blue_Pin, GPIO_PIN_RESET);
 }
 void LED_Blue_Off(void) {
-	HAL_GPIO_WritePin(LED_Blue_GPIO_Port, LED_Blue_Pin, 0);
+	HAL_GPIO_WritePin(LED_Blue_GPIO_Port, LED_Blue_Pin, GPIO_PIN_SET);
 }
 /* USER CODE END 4 */
 
