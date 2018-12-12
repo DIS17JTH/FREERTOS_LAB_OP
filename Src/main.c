@@ -82,7 +82,7 @@ void DelayNonsens(uint32_t *DelayCounter, uint32_t const * TaretCount);
 
 /* USER CODE BEGIN 0 */
 void Led_GreenBlink(void *pvParameters) {
-	const TickType_t xDelay = 250 / portTICK_PERIOD_MS;
+	const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
 	uint32_t GreenDelay = 0;
 	const uint32_t TargetCount = 200000;
 
@@ -99,7 +99,7 @@ void Led_GreenBlink(void *pvParameters) {
 
 }
 void Led_RedBlink(void *pvParameters) {
-	const TickType_t xDelay = 250 / portTICK_PERIOD_MS;
+	const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
 	uint32_t RedDelay = 0;
 	const uint32_t TargetCount = 200000;
 
@@ -166,6 +166,12 @@ int main(void) {
 	MX_GPIO_Init();
 
 	/* USER CODE BEGIN 2 */
+	xTaskCreate(Led_GreenBlink, (const char* const ) "led green",
+			configMINIMAL_STACK_SIZE, 0, 3, 0);
+	xTaskCreate(Led_RedBlink, (const char* const ) "led red",
+			configMINIMAL_STACK_SIZE, 0, 2, 0);
+	xTaskCreate(Led_BlueBlink, (const char* const ) "led blue",
+			configMINIMAL_STACK_SIZE, 0, 1, 0);
 
 	/* USER CODE END 2 */
 
@@ -179,16 +185,10 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	xTaskCreate(Led_GreenBlink, (const char* const ) "led green",
-			configMINIMAL_STACK_SIZE, 0, 3, 0);
-	xTaskCreate(Led_RedBlink, (const char* const ) "led red",
-			configMINIMAL_STACK_SIZE, 0, 2, 0);
-	xTaskCreate(Led_BlueBlink, (const char* const ) "led blue",
-			configMINIMAL_STACK_SIZE, 0, 1, 0);
 
-#ifdef PEX_RTOS_START
-	PEX_RTOS_START();
-#endif
+//#ifdef PEX_RTOS_START
+//	PEX_RTOS_START();
+//#endif
 
 	while (1) {
 		/* USER CODE END WHILE */
