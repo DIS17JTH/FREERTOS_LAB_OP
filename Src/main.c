@@ -135,7 +135,7 @@ void Led_BlueBlink(void *pvParameters) {
 		for (int var = 0; var < 10; var++) {
 			vTaskDelay(xDelay);
 		}
-		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+
 			LED_Blue_On();
 			DelayNonsens(&BlueDelay, &TargetCount);
 			vTaskDelay(xDelay);
@@ -143,7 +143,7 @@ void Led_BlueBlink(void *pvParameters) {
 			DelayNonsens(&BlueDelay, &TargetCount);
 			vTaskDelay(xDelay);
 			xSemaphoreGive(LEDMutex);
-		}
+
 	}
 
 }
@@ -190,9 +190,9 @@ int main(void) {
 	xTaskCreate(Led_BlueBlink, (const char* const ) "led blue",
 	configMINIMAL_STACK_SIZE, 0, 1, 0);
 
-	LEDMutex = xSemaphoreCreateMutex();
+	LEDSemaphore = xSemaphoreCreateBinary();
 
-	if(LEDMutex == NULL){
+	if(LEDSemaphore == NULL){
 
 	}else{
 
