@@ -81,24 +81,25 @@ void DelayNonsens(uint32_t *DelayCounter, uint32_t const * TaretCount);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-SemaphoreHandle_t LEDMutex;
+SemaphoreHandle_t semaphoreToBlue;
+SemaphoreHandle_t semaphoreToGreen;
 
 void Led_GreenBlink(void *pvParameters) {
 	const TickType_t xDelay = 150 / portTICK_PERIOD_MS;
 	uint32_t GreenDelay = 0;
 	const uint32_t TargetCount = 200000;
-
+	xSemaphoreGive(semaphoreToGreen);
 	for (;;) {
 		for (int var = 0; var < 10; var++) {
 			vTaskDelay(xDelay);
 		}
 
-		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+		if (xSemaphoreTake(semaphoreToGreen, (TickType_t ) 10) == pdTRUE) {
 			LED_Green_On();
 			for (int var = 0; var < 10; var++) {
 				vTaskDelay(xDelay);
 			}
-			xSemaphoreGive(LEDMutex);
+			xSemaphoreGive(semaphoreToBlue);
 			LED_Green_Off();
 		}
 	}
@@ -131,12 +132,12 @@ void Led_BlueBlink(void *pvParameters) {
 		for (int var = 0; var < 10; var++) {
 			vTaskDelay(xDelay);
 		}
-		if (xSemaphoreTake(LEDMutex, (TickType_t ) 10) == pdTRUE) {
+		if (xSemaphoreTake(semaphoreToBlue, (TickType_t ) 10) == pdTRUE) {
 			LED_Blue_On();
 			for (int var = 0; var < 10; var++) {
 				vTaskDelay(xDelay);
 			}
-			xSemaphoreGive(LEDMutex);
+			xSemaphoreGive(semaphoreToGreen);
 			LED_Blue_Off();
 		}
 	}
@@ -189,9 +190,10 @@ int main(void) {
 	xTaskCreate(Led_BlueBlink, (const char* const ) "led blue",
 	configMINIMAL_STACK_SIZE, 0, 3, 0);
 
-	LEDMutex = xSemaphoreCreateMutex();
+	semaphoreToBlue = xSemaphoreCreateBinary();
+	semaphoreToGreen = xSemaphoreCreateBinary();
 
-	if (LEDMutex == NULL) {
+	if (semaphoreToBlue == NULL) {
 
 	} else {
 
