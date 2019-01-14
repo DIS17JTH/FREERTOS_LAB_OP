@@ -97,7 +97,7 @@ void Led_GreenBlink(void *pvParameters) {
 		if (xSemaphoreTake(semaphoreToGreen, (TickType_t ) 10) == pdTRUE) {
 			LED_Green_On();
 			for (int var = 0; var < 10; var++) {
-				vTaskDelay(xDelay);
+				DelayNonsens(&GreenDelay, &TargetCount);
 			}
 			xSemaphoreGive(semaphoreToBlue);
 			LED_Green_Off();
@@ -117,7 +117,7 @@ void Led_RedBlink(void *pvParameters) {
 //		vTaskDelay(xDelay);
 		LED_Red_On();
 		for (int var = 0; var < 10; var++) {
-			vTaskDelay(xDelay);
+			DelayNonsens(&RedDelay, &TargetCount);
 		}
 		LED_Red_Off();
 	}
@@ -135,7 +135,7 @@ void Led_BlueBlink(void *pvParameters) {
 		if (xSemaphoreTake(semaphoreToBlue, (TickType_t ) 10) == pdTRUE) {
 			LED_Blue_On();
 			for (int var = 0; var < 10; var++) {
-				vTaskDelay(xDelay);
+				DelayNonsens(&BlueDelay, &TargetCount);
 			}
 			xSemaphoreGive(semaphoreToGreen);
 			LED_Blue_Off();
